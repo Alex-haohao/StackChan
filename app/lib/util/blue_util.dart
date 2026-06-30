@@ -499,9 +499,9 @@ class BlueUtil {
       final characteristics = service.characteristics;
       
       for (var characteristic in characteristics) {
-                characteristicCallback?.call(peripheral, characteristic);
         await _setupCharacteristicListener(peripheral, characteristic);
         _saveCharacteristicReference(characteristic);
+        characteristicCallback?.call(peripheral, characteristic);
       }
     } catch (e) {
           }
