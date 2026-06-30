@@ -10,41 +10,114 @@
 /// for communicating with the StackChan backend server.
 ///
 /// Backend Configuration:
-/// - Update the [url] constant to point to your backend server address
-/// - The base URL is constructed as: http://<server-ip>:<port>/stackChan/
-/// - WebSocket endpoint uses: ws://<server-ip>:<port>/stackChan/ws
+/// - Pass STACKCHAN_SERVER_HOST at build time instead of hardcoding production
+///   infrastructure into source control.
+/// - Pass STACKCHAN_SERVER_TLS=true when the server is exposed over HTTPS/WSS.
+/// - The base URL is constructed as: `scheme://server/stackChan/`
+/// - WebSocket endpoint uses: `ws-scheme://server/stackChan/ws`
 class Urls {
   /// Backend server base address configuration
   ///
-  /// IMPORTANT: Update this to your actual backend server address
-  /// Format: "server-ip:port/"
-  /// Example: "192.168.1.100:8080/" or "api.example.com/"
+  /// Format: "server-ip:port", "api.example.com", or "https://api.example.com"
+  /// Example:
+  /// flutter run --dart-define=STACKCHAN_SERVER_HOST=api.example.com
+  /// flutter run --dart-define=STACKCHAN_SERVER_HOST=192.168.1.100:12800
   ///
-  /// For development, you can use the commented local IP below
-  static const String url = "00.000.000.000:0000/";
+  /// Keep the default as the upstream placeholder so local builds fail closed
+  /// unless a developer intentionally points the app at a backend.
+  static const String url = String.fromEnvironment(
+    "STACKCHAN_SERVER_HOST",
+    defaultValue: "00.000.000.000:0000",
+  );
 
+  static const bool _useTls = bool.fromEnvironment(
+    "STACKCHAN_SERVER_TLS",
+    defaultValue: false,
+  );
+
+  static const String _pathPrefix = String.fromEnvironment(
+    "STACKCHAN_SERVER_PATH_PREFIX",
+    defaultValue: "",
+  );
+
+  static String _normalizeHost(String host) {
+    final value = host.trim();
+    if (value.startsWith("http://")) {
+      return value.substring("http://".length).replaceAll(RegExp(r"/+$"), "");
+    }
+    if (value.startsWith("https://")) {
+      return value.substring("https://".length).replaceAll(RegExp(r"/+$"), "");
+    }
+    return value.replaceAll(RegExp(r"/+$"), "");
+  }
+
+  static String _normalizePathPrefix(String pathPrefix) {
+    final value = pathPrefix.trim().replaceAll(RegExp(r"^/+|/+$"), "");
+    return value.isEmpty ? "" : "$value/";
+  }
+
+  static String _origin({required String host, required bool useTls}) {
+    final scheme = useTls || host.trim().startsWith("https://")
+        ? "https"
+        : "http";
+    return "$scheme://${_normalizeHost(host)}/";
+  }
+
+  static String _webSocketOrigin({required String host, required bool useTls}) {
+    final scheme = useTls || host.trim().startsWith("https://") ? "wss" : "ws";
+    return "$scheme://${_normalizeHost(host)}/";
+  }
+
+  static String buildBaseUrl({
+    required String host,
+    bool useTls = false,
+    String pathPrefix = "",
+  }) {
+    return "${_origin(host: host, useTls: useTls)}"
+        "${_normalizePathPrefix(pathPrefix)}stackChan/";
+  }
+
+  static String buildFileUrl({
+    required String host,
+    bool useTls = false,
+    String pathPrefix = "",
+  }) {
+    return "${_origin(host: host, useTls: useTls)}"
+        "${_normalizePathPrefix(pathPrefix)}";
+  }
+
+  static String buildWebSocketUrl({
+    required String host,
+    bool useTls = false,
+    String pathPrefix = "",
+  }) {
+    return "${_webSocketOrigin(host: host, useTls: useTls)}"
+        "${_normalizePathPrefix(pathPrefix)}stackChan/ws";
+  }
 
   /// Get the HTTP base URL for API requests
   ///
-  /// Returns: "http://<server-address>/stackChan/"
+  /// Returns: `http://server-address/stackChan/`
   static String getBaseUrl() {
-    return "http://$url"
-        "stackChan/";
+    return buildBaseUrl(host: url, useTls: _useTls, pathPrefix: _pathPrefix);
   }
 
   /// Get the HTTP base URL for file operations (uploads and downloads)
   ///
-  /// Returns: "http://<server-address>/"
+  /// Returns: `http://server-address/`
   static String getFileUrl() {
-    return "http://$url";
+    return buildFileUrl(host: url, useTls: _useTls, pathPrefix: _pathPrefix);
   }
 
   /// Get the WebSocket URL for real-time communication
   ///
-  /// Returns: "ws://<server-address>/stackChan/ws"
+  /// Returns: `ws://server-address/stackChan/ws`
   static String getWebSocketUrl() {
-    return "ws://$url"
-        "stackChan/ws";
+    return buildWebSocketUrl(
+      host: url,
+      useTls: _useTls,
+      pathPrefix: _pathPrefix,
+    );
   }
 
   // ===========================================================================
@@ -144,5 +217,6 @@ class Urls {
 
   /// Generate license token for device activation
   /// Used for StackChan device licensing and activation
-  static const String xiaozhiGenerateLicenseToken = "xiaozhi/generateLicenseToken";
+  static const String xiaozhiGenerateLicenseToken =
+      "xiaozhi/generateLicenseToken";
 }

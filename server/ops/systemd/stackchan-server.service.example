@@ -1,0 +1,20 @@
+[Unit]
+Description=StackChan Server
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=stackchan-server
+Group=stackchan-server
+WorkingDirectory=/opt/stackchan-server/current
+ExecStartPre=/usr/bin/test -r /opt/stackchan-server/current/config.yaml
+ExecStart=/opt/stackchan-server/current/stackChan
+Restart=on-failure
+RestartSec=3
+ReadWritePaths=/opt/stackchan-server/shared /var/lib/stackchan-server /var/log/stackchan-server
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

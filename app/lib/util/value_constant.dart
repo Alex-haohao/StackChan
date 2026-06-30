@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+import 'dart:convert';
+
 /// Application-wide constant values and configuration
 ///
 /// This class contains:
@@ -205,12 +207,12 @@ class ValueConstant {
   /// - Used for RSA-OAEP encryption with SHA-256 padding
   /// - Encrypt sensitive data before sending to server
   ///
-  /// To replace with your backend key:
-  /// 1. Generate RSA key pair on your server (2048-bit recommended)
-  /// 2. Extract the public key in PEM format
-  /// 3. Replace the content below with your server's public key
-  static const String serverPublicKey = '''
-''';
+  /// To replace with your backend key, prefer build-time configuration:
+  /// `--dart-define=STACKCHAN_SERVER_PUBLIC_KEY_BASE64=base64-pem`
+  static String get serverPublicKey => _pemFromEnvironment(
+    pem: _serverPublicKeyPem,
+    base64Pem: _serverPublicKeyBase64,
+  );
 
   /// Client RSA Private Key for decrypting incoming responses
   ///
@@ -222,8 +224,55 @@ class ValueConstant {
   /// Key Usage:
   /// - Decrypt data encrypted with the corresponding public key
   /// - Used for secure server-to-client communication
-  static const String clientPrivateKey = '''
-''';
+  /// For local and internal builds, prefer:
+  /// `--dart-define=STACKCHAN_CLIENT_PRIVATE_KEY_BASE64=base64-pem`
+  static String get clientPrivateKey => _pemFromEnvironment(
+    pem: _clientPrivateKeyPem,
+    base64Pem: _clientPrivateKeyBase64,
+  );
+
+  static const String _serverPublicKeyPem = String.fromEnvironment(
+    "STACKCHAN_SERVER_PUBLIC_KEY_PEM",
+    defaultValue: "",
+  );
+
+  static const String _serverPublicKeyBase64 = String.fromEnvironment(
+    "STACKCHAN_SERVER_PUBLIC_KEY_BASE64",
+    defaultValue: "",
+  );
+
+  static const String _clientPrivateKeyPem = String.fromEnvironment(
+    "STACKCHAN_CLIENT_PRIVATE_KEY_PEM",
+    defaultValue: "",
+  );
+
+  static const String _clientPrivateKeyBase64 = String.fromEnvironment(
+    "STACKCHAN_CLIENT_PRIVATE_KEY_BASE64",
+    defaultValue: "",
+  );
+
+  static const String _stackChanBluePrivateKeyPem = String.fromEnvironment(
+    "STACKCHAN_BLUE_PRIVATE_KEY_PEM",
+    defaultValue: "",
+  );
+
+  static const String _stackChanBluePrivateKeyBase64 = String.fromEnvironment(
+    "STACKCHAN_BLUE_PRIVATE_KEY_BASE64",
+    defaultValue: "",
+  );
+
+  static String _pemFromEnvironment({
+    required String pem,
+    required String base64Pem,
+  }) {
+    if (pem.isNotEmpty) {
+      return pem.replaceAll(r"\n", "\n").trim();
+    }
+    if (base64Pem.isNotEmpty) {
+      return utf8.decode(base64Decode(base64Pem)).trim();
+    }
+    return "";
+  }
 
   // ===========================================================================
   // Character Sets
@@ -308,6 +357,8 @@ class ValueConstant {
   ///
   /// Note: Each StackChan device should have a unique key pair in production.
   /// This is a default development key for testing purposes.
-  static const stackChanBluePrivateKey = '''
-''';
+  static String get stackChanBluePrivateKey => _pemFromEnvironment(
+    pem: _stackChanBluePrivateKeyPem,
+    base64Pem: _stackChanBluePrivateKeyBase64,
+  );
 }

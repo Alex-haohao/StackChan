@@ -77,51 +77,42 @@ flutter pub get
 
 ### 3. Configure Backend Server
 
-The application requires a backend server for full functionality. Configure the server endpoints before building:
+The application requires a backend server for full functionality. Keep production
+server addresses and keys out of source control; inject them at build time.
 
-#### Option A: Using Environment Configuration (Recommended)
+Required backend endpoint values:
 
-Create a `.env` file in the project root or modify the configuration directly in code.
-
-#### Option B: Direct Code Configuration
-
-Modify `lib/network/urls.dart` to set your backend server URL:
-
-```dart
-// lib/network/urls.dart
-class Urls {
-  // Update this to your backend server address
-  static const String url = "your-backend-server:port/";
-
-// ... rest of the configuration
-}
+```bash
+flutter run \
+  --dart-define=STACKCHAN_SERVER_HOST=stackchan.example.com \
+  --dart-define=STACKCHAN_SERVER_TLS=true
 ```
 
-#### Option C: Configure Value Constants
+For a local HTTP server:
 
-Update `lib/util/value_constant.dart` for encryption keys and other constants:
-
-```dart
-// lib/util/value_constant.dart
-class ValueConstant {
-  // Server RSA Public Key for encryption
-  static const String serverPublicKey = """
------BEGIN PUBLIC KEY-----
-YOUR_SERVER_PUBLIC_KEY_HERE
------END PUBLIC KEY-----
-""";
-
-  // Client RSA Private Key for decryption
-  static const String clientPrivateKey = """
------BEGIN RSA PRIVATE KEY-----
-YOUR_CLIENT_PRIVATE_KEY_HERE
------END RSA PRIVATE KEY-----
-""";
-}
+```bash
+flutter run \
+  --dart-define=STACKCHAN_SERVER_HOST=192.168.1.100:12800 \
+  --dart-define=STACKCHAN_SERVER_TLS=false
 ```
 
-**Important**: For production deployments, use environment variables or secure key management instead of hardcoding
-keys.
+If the server is hosted under a reverse-proxy path prefix, add:
+
+```bash
+--dart-define=STACKCHAN_SERVER_PATH_PREFIX=stackchan
+```
+
+RSA values can be provided as PEM strings or base64-encoded PEM. Base64 is
+recommended because it avoids shell quoting problems with multi-line keys:
+
+```bash
+--dart-define=STACKCHAN_SERVER_PUBLIC_KEY_BASE64=<base64-pem>
+--dart-define=STACKCHAN_CLIENT_PRIVATE_KEY_BASE64=<base64-pem>
+--dart-define=STACKCHAN_BLUE_PRIVATE_KEY_BASE64=<base64-pem>
+```
+
+**Important**: do not commit real URLs, passwords, private keys, or generated
+`.env` files.
 
 ## Building the Application
 

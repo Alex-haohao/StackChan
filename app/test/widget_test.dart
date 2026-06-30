@@ -1,34 +1,58 @@
-/*
-SPDX-FileCopyrightText: 2026 M5Stack Technology CO LTD
-SPDX-License-Identifier: MIT
-*/
-
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stack_chan/view/app.dart';
+import 'package:stack_chan/network/urls.dart';
+import 'package:stack_chan/util/value_constant.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(App());
+  group('StackChan backend URL configuration', () {
+    test('builds default HTTP endpoints from a host and port', () {
+      expect(
+        Urls.buildBaseUrl(host: '192.0.2.10:12800'),
+        'http://192.0.2.10:12800/stackChan/',
+      );
+      expect(
+        Urls.buildFileUrl(host: '192.0.2.10:12800'),
+        'http://192.0.2.10:12800/',
+      );
+      expect(
+        Urls.buildWebSocketUrl(host: '192.0.2.10:12800'),
+        'ws://192.0.2.10:12800/stackChan/ws',
+      );
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('switches HTTP and WebSocket schemes together for TLS', () {
+      expect(
+        Urls.buildBaseUrl(host: 'api.example.com', useTls: true),
+        'https://api.example.com/stackChan/',
+      );
+      expect(
+        Urls.buildWebSocketUrl(host: 'api.example.com', useTls: true),
+        'wss://api.example.com/stackChan/ws',
+      );
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('normalizes schemes, slashes, and reverse-proxy path prefixes', () {
+      expect(
+        Urls.buildBaseUrl(
+          host: 'https://api.example.com/',
+          pathPrefix: '/stackchan-prod/',
+        ),
+        'https://api.example.com/stackchan-prod/stackChan/',
+      );
+      expect(
+        Urls.buildFileUrl(
+          host: 'http://api.example.com/',
+          pathPrefix: 'stackchan-prod',
+        ),
+        'http://api.example.com/stackchan-prod/',
+      );
+    });
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('StackChan RSA configuration', () {
+    test('fails closed when RSA keys are not provided at build time', () {
+      expect(ValueConstant.serverPublicKey, isEmpty);
+      expect(ValueConstant.clientPrivateKey, isEmpty);
+      expect(ValueConstant.stackChanBluePrivateKey, isEmpty);
+    });
   });
 }

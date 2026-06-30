@@ -1,0 +1,45 @@
+server:
+  address: ":12800"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+
+logger:
+  path: "./logs"
+  file: "{Y-m-d}.log"
+  level: "all"
+  stdout: true
+  rotateExpire: "7d"
+  rotateBackup: 10
+  rotateSize: "50M"
+
+database:
+  default:
+    link: "mysql:<db-user>:<db-password>@tcp(mysql:3306)/stackChan?charset=utf8mb4&collation=utf8mb4_0900_ai_ci&parseTime=true"
+
+jwt:
+  secret: "<long-random-jwt-secret>"
+
+admin:
+  users:
+    - username: "<admin-username>"
+      password: "<admin-password>"
+
+rsa:
+  server:
+    public: |
+      -----BEGIN PUBLIC KEY-----
+      <server-public-key>
+      -----END PUBLIC KEY-----
+    private: |
+      replace-with-server-private-key-pem
+  client:
+    public: |
+      -----BEGIN PUBLIC KEY-----
+      <client-public-key>
+      -----END PUBLIC KEY-----
+    private: |
+      replace-with-client-private-key-pem
+
+xiaozhi:
+  secret_key: ""
+  generate_license_token: ""
