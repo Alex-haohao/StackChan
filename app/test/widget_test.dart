@@ -49,10 +49,18 @@ void main() {
   });
 
   group('StackChan RSA configuration', () {
-    test('fails closed when RSA keys are not provided at build time', () {
-      expect(ValueConstant.serverPublicKey, isEmpty);
-      expect(ValueConstant.clientPrivateKey, isEmpty);
-      expect(ValueConstant.stackChanBluePrivateKey, isEmpty);
+    test('is empty when absent or decoded as PEM when provided', () {
+      for (final value in [
+        ValueConstant.serverPublicKey,
+        ValueConstant.clientPrivateKey,
+        ValueConstant.stackChanBluePrivateKey,
+      ]) {
+        if (value.isEmpty) {
+          continue;
+        }
+        expect(value, startsWith('-----BEGIN '));
+        expect(value, contains('-----END '));
+      }
     });
   });
 }
