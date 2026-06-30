@@ -37,10 +37,10 @@ namespace {
 
 constexpr int kEyeFrameCount    = 4;
 constexpr int kMouthFrameCount  = 4;
-constexpr int kLeftEyeCenterX   = -20;
-constexpr int kRightEyeCenterX  = 20;
-constexpr int kEyeCenterY       = -36;
-constexpr int kMouthCenterX     = 0;
+constexpr int kLeftEyeCenterX   = -24;
+constexpr int kRightEyeCenterX  = 22;
+constexpr int kEyeCenterY       = -38;
+constexpr int kMouthCenterX     = -2;
 constexpr int kMouthCenterY     = -11;
 constexpr int kEyeMinOffsetX    = -12;
 constexpr int kEyeMaxOffsetX    = 12;

@@ -15,6 +15,7 @@
 #include <lvgl.h>
 #include <lvgl_theme.h>
 #include <stackchan/stackchan.h>
+#include <stackchan/avatar/active_avatar.h>
 #include <assets/lang_config.h>
 #include <hal/hal.h>
 
@@ -251,9 +252,8 @@ void StackChanAvatarDisplay::SetupUI()
 
     ESP_LOGI(TAG, "Creating Stack-chan Avatar...");
 
-    auto avatar = std::make_unique<DefaultAvatar>();
-    avatar->init(lv_screen_active());
-    avatar->getPanel()->onClick().connect([]() {
+    auto active_avatar = create_active_avatar(lv_screen_active());
+    active_avatar.panel->onClick().connect([]() {
         static uint32_t last_toggle_tick = 0;
         const uint32_t now               = GetHAL().millis();
         if (last_toggle_tick != 0 && now - last_toggle_tick < 2000) {
@@ -266,7 +266,7 @@ void StackChanAvatarDisplay::SetupUI()
         }
     });
 
-    stackchan.attachAvatar(std::move(avatar));
+    stackchan.attachAvatar(std::move(active_avatar.avatar));
     stackchan.addModifier(std::make_unique<BreathModifier>());
     blink_modifier_id_ = stackchan.addModifier(std::make_unique<BlinkModifier>());
     stackchan.addModifier(std::make_unique<HeadPetModifier>());

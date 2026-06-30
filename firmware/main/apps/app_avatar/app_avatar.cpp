@@ -12,7 +12,7 @@
 #include <assets/assets.h>
 #include <smooth_lvgl.hpp>
 #include <stackchan/stackchan.h>
-#include <stackchan/avatar/skins/image/image_avatar.h>
+#include <stackchan/avatar/active_avatar.h>
 #include <apps/common/common.h>
 #include <string_view>
 #include <cstdint>
@@ -66,7 +66,7 @@ void AppAvatar::onOpen()
 {
     mclog::tagInfo(getAppInfo().name, "on open");
 
-    // Create loading page
+#if CONFIG_STACKCHAN_AVATAR_WS_SERVICE
     std::unique_ptr<view::LoadingPage> loading_page;
     {
         LvglLockGuard lock;
@@ -78,21 +78,18 @@ void AppAvatar::onOpen()
         LvglLockGuard lock;
         loading_page->setMessage(msg);
     });
+#endif
     // GetHAL().startBleServer();
 
     LvglLockGuard lock;
 
-    // Destroy loading page
+#if CONFIG_STACKCHAN_AVATAR_WS_SERVICE
     loading_page.reset();
-
-#if CONFIG_STACKCHAN_AVATAR_SKIN_IMAGE
-    auto avatar = std::make_unique<avatar::image::ImageAvatar>();
-#else
-    auto avatar = std::make_unique<avatar::DefaultAvatar>();
 #endif
-    avatar->init(lv_screen_active());
-    avatar->getPanel()->onClick().connect([&]() { _screen_clicked_flag = true; });
-    GetStackChan().attachAvatar(std::move(avatar));
+
+    auto active_avatar = avatar::create_active_avatar(lv_screen_active());
+    active_avatar.panel->onClick().connect([&]() { _screen_clicked_flag = true; });
+    GetStackChan().attachAvatar(std::move(active_avatar.avatar));
 
     /* ------------------------------- BLE events ------------------------------- */
     GetHAL().onBleAvatarData.connect([&](const char* data) {
@@ -285,6 +282,7 @@ void AppAvatar::onClose()
         GetHAL().onWsCallEnd.clear();
         GetHAL().onWsTextMessage.clear();
         GetHAL().onWsDanceData.clear();
+        GetHAL().onWsLog.clear();
 
         view::destroy_home_indicator();
         view::destroy_status_bar();
