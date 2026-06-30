@@ -12,6 +12,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stack_chan/app_state.dart';
 import 'package:stack_chan/model/expression_data.dart';
+import 'package:stack_chan/util/ble_json_frame_decoder.dart';
 import 'package:stack_chan/util/value_constant.dart';
 import 'package:stack_chan/view/app.dart';
 import 'package:stack_chan/view/popup/device_wifi_config.dart';
@@ -69,6 +70,7 @@ class BlueUtil {
   StreamSubscription<BluetoothConnectionState>? _connectionStateSubscription;
   Timer? _cleanupTimer;
   final Duration _deviceTimeout = const Duration(seconds: 3);
+  final BleJsonFrameDecoder _wifiSetFrameDecoder = BleJsonFrameDecoder();
 
   static const String motionCharacteristicUUID =
       "e2e5e5e1-1234-5678-1234-56789abcdef0";
@@ -532,7 +534,9 @@ class BlueUtil {
     characteristic.lastValueStream.listen((value) {
       if (value.isEmpty) return;
             if (uuid == wifiSetCharacteristicUUID.toLowerCase()) {
-        wifiSetCharacteristicCall?.call(value);
+        for (final frame in _wifiSetFrameDecoder.add(value)) {
+          wifiSetCharacteristicCall?.call(frame);
+        }
       }
     });
   }
@@ -578,6 +582,7 @@ class BlueUtil {
   }
 
   void _resetCharacteristics() {
+    _wifiSetFrameDecoder.reset();
     writeWifiSetCharacteristic = null;
     writeHeadCharacteristic = null;
     writeExpressionCharacteristic = null;
