@@ -159,6 +159,7 @@ private:
     bool _was_connected = false;
     std::atomic<bool> _is_wifi_connecting{false};
     std::unique_ptr<StackChanWifiStation> _wifi_station;
+    static constexpr size_t kMaxBleNotifyChunkBytes = 96;
 
     void on_config_data(const char* json_data)
     {
@@ -238,7 +239,22 @@ private:
 
         std::string json_str;
         ArduinoJson::serializeJson(doc, json_str);
-        stackchan_ble_notify_config(json_str.c_str(), json_str.length());
+        notify_config_json(json_str);
+    }
+
+    void notify_config_json(std::string_view json)
+    {
+        for (size_t offset = 0; offset < json.size(); offset += kMaxBleNotifyChunkBytes) {
+            const size_t remaining = json.size() - offset;
+            const size_t chunk_len = remaining > kMaxBleNotifyChunkBytes ? kMaxBleNotifyChunkBytes : remaining;
+            const auto chunk       = json.substr(offset, chunk_len);
+
+            stackchan_ble_notify_config(chunk.data(), chunk.size());
+
+            if (offset + chunk_len < json.size()) {
+                GetHAL().delay(20);
+            }
+        }
     }
 };
 
