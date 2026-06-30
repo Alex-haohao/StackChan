@@ -289,9 +289,16 @@ void Hal::startAppConfigServer()
 {
     mclog::tagInfo(_tag, "start app config server");
 
+    static int app_config_server_worker_id = -1;
+    if (app_config_server_worker_id >= 0) {
+        mclog::tagInfo(_tag, "app config server already started");
+        return;
+    }
+
     ble_init(true);
 
-    mooncake::GetMooncake().extensionManager()->createAbility(std::make_unique<AppConfigServerWorker>());
+    app_config_server_worker_id =
+        mooncake::GetMooncake().extensionManager()->createAbility(std::make_unique<AppConfigServerWorker>());
 }
 
 bool Hal::isAppConfiged()
