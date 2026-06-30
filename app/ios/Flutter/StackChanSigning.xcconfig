@@ -1,0 +1,6 @@
+// Default official signing values. Create Flutter/Signing.local.xcconfig to
+// override these for local device deployment without hardcoding personal team
+// settings into the project file.
+STACKCHAN_IOS_DEVELOPMENT_TEAM=NG678HLKHZ
+STACKCHAN_IOS_BUNDLE_IDENTIFIER=com.m5stack.StackChan
+STACKCHAN_IOS_DISPLAY_NAME=StackChan World
