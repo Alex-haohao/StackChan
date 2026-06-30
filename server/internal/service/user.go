@@ -22,7 +22,8 @@ import (
 )
 
 const (
-	TokenExpire = 365 * 24 * time.Hour
+	TokenExpire                 = 365 * 24 * time.Hour
+	OfficialM5StackRegistration = "https://community.m5stack.com/register"
 )
 
 // Login User login
@@ -147,10 +148,17 @@ func Registration(ctx context.Context, req *v2.RegistrationReq) (res *v2.Registr
 // callRemoteRegister Call remote registration interface
 func callRemoteRegister(ctx context.Context, req *v2.RegistrationReq) (res *model.RegistrationResponse, err error) {
 	resp := &model.RemoteRegisterResp{}
-	g.Log().Infof(ctx, "Remote registration request parameters: username=%s, email=%s", req.UserName, req.Email)
+	g.Log().Infof(ctx, "Remote registration request parameters: username=%s", req.UserName)
 
 	RegistrationToken := g.Cfg().MustGet(ctx, "m5stack.registrationToken").String()
 	RegistrationUrl := g.Cfg().MustGet(ctx, "m5stack.registrationUrl").String()
+	if strings.TrimSpace(RegistrationUrl) == "" || strings.TrimSpace(RegistrationToken) == "" {
+		return nil, gerror.NewCodef(
+			gcode.CodeBusinessValidationFailed,
+			"Registration is not configured on this self-hosted server. Create an account at %s, then log in here.",
+			OfficialM5StackRegistration,
+		)
+	}
 
 	clientResp := g.Client().
 		SetHeader("Authorization", RegistrationToken).
