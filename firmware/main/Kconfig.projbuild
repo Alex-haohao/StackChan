@@ -11,6 +11,25 @@ config STACKCHAN_SERVER_URL
 
 endmenu
 
+menu "StackChan Avatar"
+
+choice STACKCHAN_AVATAR_SKIN
+    prompt "Avatar Skin"
+    default STACKCHAN_AVATAR_SKIN_DEFAULT
+    help
+        Select the avatar renderer used by the Avatar app. The image skin keeps
+        the official avatar control protocol and maps existing semantic feature
+        updates onto generated image sprites.
+
+    config STACKCHAN_AVATAR_SKIN_DEFAULT
+        bool "Default Avatar"
+
+    config STACKCHAN_AVATAR_SKIN_IMAGE
+        bool "Image Avatar"
+endchoice
+
+endmenu
+
 menu "Xiaozhi Assistant"
 
 config OTA_URL

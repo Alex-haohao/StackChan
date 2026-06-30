@@ -6,6 +6,7 @@ namespace stackchan::avatar::image {
 
 int clampInt(int value, int minValue, int maxValue);
 int selectFrameForWeight(int weight, int frameCount);
+int selectFrameForWeight(int weight, int frameCount, bool reverse);
 int mapNormalizedToRange(int normalized, int minValue, int maxValue);
 const char* emotionAssetName(Emotion emotion);
 

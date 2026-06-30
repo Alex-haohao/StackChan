@@ -34,6 +34,9 @@ void testFrameSelection()
     expectEqual(selectFrameForWeight(100, 3), 2, "full weight uses last frame");
     expectEqual(selectFrameForWeight(180, 3), 2, "high weight clamps to last frame");
     expectEqual(selectFrameForWeight(80, 1), 0, "one-frame sprite always selects zero");
+    expectEqual(selectFrameForWeight(0, 4, true), 3, "reverse maps zero weight to last frame");
+    expectEqual(selectFrameForWeight(100, 4, true), 0, "reverse maps full weight to first frame");
+    expectEqual(selectFrameForWeight(50, 4, true), 1, "reverse maps middle weight symmetrically");
 }
 
 void testNormalizedRangeMapping()

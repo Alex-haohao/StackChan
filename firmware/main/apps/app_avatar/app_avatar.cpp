@@ -5,12 +5,14 @@
  */
 #include "app_avatar.h"
 #include "view/ws_call.h"
+#include <sdkconfig.h>
 #include <hal/hal.h>
 #include <mooncake.h>
 #include <mooncake_log.h>
 #include <assets/assets.h>
 #include <smooth_lvgl.hpp>
 #include <stackchan/stackchan.h>
+#include <stackchan/avatar/skins/image/image_avatar.h>
 #include <apps/common/common.h>
 #include <string_view>
 #include <cstdint>
@@ -83,8 +85,11 @@ void AppAvatar::onOpen()
     // Destroy loading page
     loading_page.reset();
 
-    // Create default avatar
+#if CONFIG_STACKCHAN_AVATAR_SKIN_IMAGE
+    auto avatar = std::make_unique<avatar::image::ImageAvatar>();
+#else
     auto avatar = std::make_unique<avatar::DefaultAvatar>();
+#endif
     avatar->init(lv_screen_active());
     avatar->getPanel()->onClick().connect([&]() { _screen_clicked_flag = true; });
     GetStackChan().attachAvatar(std::move(avatar));
