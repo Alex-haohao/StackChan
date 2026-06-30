@@ -318,6 +318,7 @@ idf_component_register(SRCS ${SOURCES}
                         esp-now
                         mooncake
                         mooncake_log
+                        mbedtls
                         smooth_ui_toolkit
                     )
 

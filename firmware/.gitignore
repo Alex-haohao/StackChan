@@ -65,5 +65,6 @@ obj/
 sdkconfig
 sdkconfig.old
 sdkconfig.defaults.local
+main/hal/local_secret_config.h
 
 xiaozhi-esp32/
