@@ -111,6 +111,12 @@ aligned or more appealing than the composed body plus eye/mouth overlays,
 repair the source manifest anchors or eye/mouth strips first. Do not patch
 firmware constants as the first response.
 
+The current repaired pack records `qa/postprocess-summary.json` with
+`mode: "face-layout-repair"`. Do not rerun the generic strip-centering
+postprocess over those repaired eye/mouth strips before descriptor sync unless
+the repaired assets are intentionally being replaced; rerun semantic-fit,
+anchor-fit, motion-sheet, and preview QA after any such replacement.
+
 After the source pack is accepted, sync firmware descriptors and offsets with:
 
 ```bash
