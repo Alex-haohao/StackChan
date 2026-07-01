@@ -29,23 +29,6 @@ get_idf
 idf.py build
 ```
 
-### Build ImageAvatar Skin
-
-Create a local overlay. This file is git-ignored:
-
-```bash
-cat > sdkconfig.defaults.local <<'EOF'
-# CONFIG_STACKCHAN_AVATAR_SKIN_DEFAULT is not set
-CONFIG_STACKCHAN_AVATAR_SKIN_IMAGE=y
-EOF
-rm -f sdkconfig sdkconfig.old
-idf.py fullclean
-idf.py build
-```
-
-Remove `sdkconfig.defaults.local` and regenerate `sdkconfig` when returning to
-the default official avatar skin.
-
 ### Host-side tests
 
 The motion coordinate helpers can be tested without ESP-IDF hardware:

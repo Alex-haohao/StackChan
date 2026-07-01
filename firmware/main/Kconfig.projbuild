@@ -22,22 +22,6 @@ config STACKCHAN_AVATAR_WS_SERVICE
         authorization key is available. The AI Agent/Xiaozhi avatar path is
         independent from this service.
 
-choice STACKCHAN_AVATAR_SKIN
-    prompt "Avatar Skin"
-    default STACKCHAN_AVATAR_SKIN_DEFAULT
-    help
-        Select the avatar renderer used by the Avatar app and the AI
-        Agent/Xiaozhi display. The image skin keeps the official avatar control
-        protocol and maps existing semantic feature updates onto generated
-        image sprites.
-
-    config STACKCHAN_AVATAR_SKIN_DEFAULT
-        bool "Default Avatar"
-
-    config STACKCHAN_AVATAR_SKIN_IMAGE
-        bool "Image Avatar"
-endchoice
-
 endmenu
 
 menu "Xiaozhi Assistant"

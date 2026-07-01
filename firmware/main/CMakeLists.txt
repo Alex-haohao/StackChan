@@ -15,9 +15,6 @@ file(GLOB_RECURSE STACK_CHAN_SOURCES
     "stackchan/*.cc"
     "stackchan/*.cpp"
 )
-if(NOT CONFIG_STACKCHAN_AVATAR_SKIN_IMAGE)
-    list(FILTER STACK_CHAN_SOURCES EXCLUDE REGEX ".*/stackchan/avatar/skins/image/.*")
-endif()
 set(STACK_CHAN_INCLUDE_DIRS 
     "."
 )
