@@ -103,7 +103,7 @@ class MusicInfo {
         }
       } catch (e) {
         //onlyPrintdeletefaillog,NotinterruptMainStreamProcess / Thread
-              }
+      }
     }
   }
 
@@ -222,8 +222,7 @@ class MusicUtil {
   Future<void> _initAnalyzer() async {
     try {
       await MusicFeatureAnalyzer.initialize();
-          } catch (e) {
-          }
+    } catch (e) {}
   }
 
   ///configplayerlistener(System1Managerstate)
@@ -232,10 +231,9 @@ class MusicUtil {
 
     //playerstatelisten(Containsplaystateandhandlestate)
     _audioPlayer.playerStateStream.listen((PlayerState state) {
-      
       //Playback completion check (handle completed status)
       if (state.processingState == ProcessingState.completed) {
-                _currentPosition = 0.0; //resetprogress
+        _currentPosition = 0.0; //resetprogress
 
         //SingleloopThenreplay,elseexecutecompletecallback
         if (_audioPlayer.loopMode == LoopMode.one &&
@@ -258,7 +256,7 @@ class MusicUtil {
     _audioPlayer.durationStream.listen((Duration? duration) {
       if (duration != null) {
         _musicDuration = duration.inMilliseconds / 1000.0;
-              }
+      }
     });
 
     //playprogresslisten
@@ -272,8 +270,7 @@ class MusicUtil {
 
     //errorlisten
     _audioPlayer.errorStream.listen((PlayerException? e) {
-      if (e != null) {
-              }
+      if (e != null) {}
     });
   }
 
@@ -292,11 +289,10 @@ class MusicUtil {
       final audioSource = BytesAudioSource(data, contentType: contentType);
       await _audioPlayer.setAudioSource(audioSource);
       await _audioPlayer.play();
-
-          } on PlayerException catch (e) {
-            throw Exception("播放失败: ${e.message}");
+    } on PlayerException catch (e) {
+      throw Exception("播放失败: ${e.message}");
     } catch (e) {
-            throw Exception("播放失败: $e");
+      throw Exception("播放失败: $e");
     }
   }
 
@@ -308,8 +304,9 @@ class MusicUtil {
 
   ///PlayOnlineMusic1Time(s),RepeatCallThenStopFrontFrom beginningPlay
   Future<void> playUrlMusicOnce(String? url, {Function()? completion}) async {
-    if (url == null) {
-            return;
+    final playableUrl = url?.trim();
+    if (playableUrl == null || playableUrl.isEmpty) {
+      return;
     }
     try {
       // First / PreviouslyStopFrontPlay
@@ -322,20 +319,19 @@ class MusicUtil {
       _audioPlayer.setLoopMode(LoopMode.off);
 
       // DirectlyUse setUrl Load URL
-      await _audioPlayer.setUrl(url);
+      await _audioPlayer.setUrl(playableUrl);
       await _audioPlayer.play();
-
-          } on PlayerException catch (e) {
-            throw Exception("播放失败: ${e.message}");
+    } on PlayerException catch (e) {
+      throw Exception("播放失败: ${e.message}");
     } catch (e) {
-            throw Exception("播放失败: $e");
+      throw Exception("播放失败: $e");
     }
   }
 
   ///coreplaymethod（supportloop）
   Future<void> playMusic(MusicInfo? musicInfo, {bool isLoop = false}) async {
     if (musicInfo == null) {
-            return;
+      return;
     }
 
     //Recordcurrentplaymusicinfo
@@ -348,10 +344,10 @@ class MusicUtil {
       final data = await musicInfo.loadData();
       final contentType = musicInfo.mimeType;
       await playMusicData(data, contentType: contentType);
-          } on PlayerException catch (e) {
-            throw Exception("播放失败: ${e.message}");
+    } on PlayerException catch (e) {
+      throw Exception("播放失败: ${e.message}");
     } catch (e) {
-            throw Exception("播放失败: $e");
+      throw Exception("播放失败: $e");
     }
   }
 
@@ -363,52 +359,52 @@ class MusicUtil {
     _currentPosition = 0.0;
     _playbackCompletion = null;
     _currentMusicInfo = null;
-      }
+  }
 
   ///pauseplay
   Future<void> pauseMusic() async {
     if (_audioPlayer.playing) {
       await _audioPlayer.pause();
-          }
+    }
   }
 
   ///resumeplay
   Future<void> resumeMusic() async {
     if (!_audioPlayer.playing && _currentMusicInfo != null) {
       await _audioPlayer.play();
-          }
+    }
   }
 
   ///setloopplaystate
   void setMusicLoop(bool isLoop) {
     final loopMode = isLoop ? LoopMode.one : LoopMode.off;
     _audioPlayer.setLoopMode(loopMode);
-      }
+  }
 
   ///jumpplayprogress
   Future<void> seekTo(double seconds) async {
     if (seconds < 0 || seconds > _musicDuration) {
-            return;
+      return;
     }
     await _audioPlayer.seek(Duration(seconds: seconds.toInt()));
     _currentPosition = seconds;
-      }
+  }
 
   ///Set volume (0.0 ~ 1.0)
   Future<void> setVolume(double volume) async {
     if (volume < 0.0 || volume > 1.0) {
-            return;
+      return;
     }
     await _audioPlayer.setVolume(volume);
-      }
+  }
 
   ///setplayspeed
   Future<void> setPlaybackSpeed(double speed) async {
     if (speed <= 0) {
-            return;
+      return;
     }
     await _audioPlayer.setSpeed(speed);
-      }
+  }
 
   ///Getcurrentplayprogress(Second(s))
   double getCurrentPosition() => _currentPosition;
@@ -428,17 +424,16 @@ class MusicUtil {
     await _audioPlayer.dispose();
     _currentMusicInfo = null;
     _playbackCompletion = null;
-      }
+  }
 
   ///improveaftermusicinfoparse(With / CarryVerboselog+cacheverify)
   Future<MusicInfo?> getMusicInfoAsync(String urlString) async {
     const tag = "MusicUtil/getMusicInfoAsync";
     try {
-      
       //1. Parse URL
       final uri = Uri.parse(urlString);
       if (!uri.isAbsolute) {
-                return null;
+        return null;
       }
 
       //2. Generate cache file info
@@ -450,7 +445,7 @@ class MusicUtil {
             '.m4a',
             '.flac',
           ].contains(extension.toLowerCase())) {
-                return null;
+        return null;
       }
       final fileName = '${uri.hashCode.toRadixString(16)}$extension';
       //useDocumentDirectoryAnd / WhileNotisWhenwhenDirectory,avoidSystemautocleancachefile
@@ -467,9 +462,9 @@ class MusicUtil {
         final stat = await file.stat();
         final fileSizeKB = stat.size / 1024;
         if (fileSizeKB < 10) {
-                    await file.delete();
+          await file.delete();
         } else {
-                    return await _extractMetadataFromFile(filePath, uri);
+          return await _extractMetadataFromFile(filePath, uri);
         }
       }
 
@@ -478,13 +473,13 @@ class MusicUtil {
       final stat = await file.stat();
       final fileSizeKB = stat.size / 1024;
       if (fileSizeKB < 10) {
-                return null;
+        return null;
       }
 
       //5. Extract metadata
       return await _extractMetadataFromFile(filePath, uri);
     } catch (e, stackTrace) {
-            return null;
+      return null;
     }
   }
 
@@ -501,8 +496,8 @@ class MusicUtil {
       }
 
       await response.pipe(file.openWrite());
-          } catch (e) {
-            rethrow;
+    } catch (e) {
+      rethrow;
     } finally {
       httpClient.close();
     }
@@ -514,11 +509,11 @@ class MusicUtil {
     try {
       final song = await MusicFeatureAnalyzer.metadata(filePath);
       if (song == null) {
-                return null;
+        return null;
       }
 
       final durationSec = song.duration ~/ 1000; //convertas
-      
+
       return MusicInfo(
         durationSec,
         filePath,
@@ -528,7 +523,7 @@ class MusicUtil {
         artwork: song.albumArt,
       );
     } catch (e, stackTrace) {
-            return null;
+      return null;
     }
   }
 
@@ -552,11 +547,10 @@ class MusicUtil {
             if (fileAge > maxAge) {
               await file.delete();
               deletedCount++;
-                          }
+            }
           }
         }
       }
-          } catch (e) {
-          }
+    } catch (e) {}
   }
 }

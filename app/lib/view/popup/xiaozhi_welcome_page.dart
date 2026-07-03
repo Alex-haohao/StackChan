@@ -121,7 +121,7 @@ class XiaoZhiEditAgentModel extends GetxController {
           AppState.shared.deviceMac,
         );
         if (generateLicense == null || generateLicense.serialNumber == null) {
-                    AppState.shared.showToast("Failed to generate device license.");
+          AppState.shared.showToast("Failed to generate device license.");
           return;
         }
 
@@ -137,7 +137,7 @@ class XiaoZhiEditAgentModel extends GetxController {
           mac,
         );
         if (!activateResult) {
-                    AppState.shared.showToast("Device cloud activation failed.");
+          AppState.shared.showToast("Device cloud activation failed.");
           return;
         }
 
@@ -830,7 +830,7 @@ class _XiaoZhiWelcomePageState extends State<XiaoZhiWelcomePage> {
               },
               title: e.voiceName ?? "",
               selected: model.selectedTtsVoice.value?.voiceId == e.voiceId,
-              iconWidget: e.voiceDemo != null
+              iconWidget: (e.voiceDemo?.trim().isNotEmpty ?? false)
                   ? CupertinoButton(
                       padding: .zero,
                       child: Icon(CupertinoIcons.speaker_2),
