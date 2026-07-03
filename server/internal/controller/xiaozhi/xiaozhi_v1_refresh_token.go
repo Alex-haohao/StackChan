@@ -13,6 +13,14 @@ import (
 )
 
 func (c *ControllerV1) RefreshToken(ctx context.Context, req *v1.RefreshTokenReq) (res *v1.RefreshTokenRes, err error) {
+	if xiaozhi.IsSelfHostedProvider() {
+		token, err := xiaozhi.GetCompatToken()
+		if err != nil {
+			return nil, err
+		}
+		return new(v1.RefreshTokenRes(token)), nil
+	}
+
 	token, err := xiaozhi.GetNewToken()
 	if err != nil {
 		return nil, err

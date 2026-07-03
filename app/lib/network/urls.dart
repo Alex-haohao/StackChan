@@ -40,6 +40,11 @@ class Urls {
     defaultValue: "",
   );
 
+  static const String _xiaozhiApiBaseUrl = String.fromEnvironment(
+    "XIAOZHI_API_BASE_URL",
+    defaultValue: "",
+  );
+
   static String _normalizeHost(String host) {
     final value = host.trim();
     if (value.startsWith("http://")) {
@@ -54,6 +59,11 @@ class Urls {
   static String _normalizePathPrefix(String pathPrefix) {
     final value = pathPrefix.trim().replaceAll(RegExp(r"^/+|/+$"), "");
     return value.isEmpty ? "" : "$value/";
+  }
+
+  static String _ensureTrailingSlash(String value) {
+    final trimmed = value.trim().replaceAll(RegExp(r"/+$"), "");
+    return trimmed.isEmpty ? "" : "$trimmed/";
   }
 
   static String _origin({required String host, required bool useTls}) {
@@ -118,6 +128,19 @@ class Urls {
       useTls: _useTls,
       pathPrefix: _pathPrefix,
     );
+  }
+
+  static String buildXiaoZhiApiBaseUrl({String configuredBaseUrl = ""}) {
+    final normalized = _ensureTrailingSlash(configuredBaseUrl);
+    return normalized.isEmpty ? "https://XiaoZhi.me/" : normalized;
+  }
+
+  static String getXiaoZhiApiBaseUrl() {
+    return buildXiaoZhiApiBaseUrl(configuredBaseUrl: _xiaozhiApiBaseUrl);
+  }
+
+  static bool hasCustomXiaoZhiApiBaseUrl() {
+    return _ensureTrailingSlash(_xiaozhiApiBaseUrl).isNotEmpty;
   }
 
   // ===========================================================================

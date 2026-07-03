@@ -130,10 +130,23 @@ class BlueNotifyStateModel {
 
   static BlueNotifyStateModel? fromJson(String json) {
     try {
-      final map = jsonDecode(json) as Map<String, dynamic>;
+      final decoded = jsonDecode(json);
+      if (decoded is! Map<String, dynamic>) {
+        return null;
+      }
+      final cmdValue = decoded['cmd'];
+      if (cmdValue != null && cmdValue is! String) {
+        return null;
+      }
+      final dataValue = decoded['data'];
+      if (dataValue != null && dataValue is! Map<String, dynamic>) {
+        return cmdValue == "notifyState"
+            ? null
+            : BlueNotifyStateModel(cmd: cmdValue);
+      }
       return BlueNotifyStateModel(
-        cmd: map['cmd'],
-        data: map['data'] != null ? BlueNotifyState.fromMap(map['data']) : null,
+        cmd: cmdValue,
+        data: dataValue != null ? BlueNotifyState.fromMap(dataValue) : null,
       );
     } catch (_) {
       return null;

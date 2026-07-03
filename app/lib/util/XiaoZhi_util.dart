@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stack_chan/model/model.dart';
 import 'package:stack_chan/network/http.dart';
@@ -34,8 +33,19 @@ import '../model/XiaoZhi/tts_list.dart';
 class XiaoZhiUtil {
   static final XiaoZhiUtil shared = XiaoZhiUtil._internal();
 
+  static String buildMcpAccessPointAddress(String tokenOrAddress) {
+    final value = tokenOrAddress.trim();
+    if (value.startsWith('ws://') ||
+        value.startsWith('wss://') ||
+        value.startsWith('http://') ||
+        value.startsWith('https://')) {
+      return value;
+    }
+    return 'wss://api.XiaoZhi.me/mcp/?token=$value';
+  }
+
   XiaoZhiUtil._internal() {
-    _dio.options.baseUrl = "https://XiaoZhi.me/";
+    _dio.options.baseUrl = Urls.getXiaoZhiApiBaseUrl();
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
     _dio.options.validateStatus = (state) {
@@ -115,11 +125,13 @@ class XiaoZhiUtil {
                     handler.resolve(newResponse);
                     return;
                   } catch (e) {
-                                      }
+                    // Keep the original response if retrying the request fails.
+                  }
                 }
               }
             } catch (e) {
-                          }
+              // Ignore non-XiaoZhi responses handled by this shared interceptor.
+            }
           }
 
           handler.next(response);
@@ -242,7 +254,7 @@ class XiaoZhiUtil {
       }
       return [];
     } catch (e) {
-            return [];
+      return [];
     }
   }
 
@@ -303,7 +315,7 @@ class XiaoZhiUtil {
       }
       return [];
     } catch (e) {
-            return [];
+      return [];
     }
   }
 
@@ -498,7 +510,7 @@ class XiaoZhiUtil {
       }
       return null;
     } catch (e) {
-            return null;
+      return null;
     }
   }
 
@@ -530,7 +542,7 @@ class XiaoZhiUtil {
       XiaozhiResponse xiaozhiResponse = XiaozhiResponse.fromJsonT(
         response.data,
       );
-            if (xiaozhiResponse.message == "该设备已经添加过，请不要重复添加") {
+      if (xiaozhiResponse.message == "该设备已经添加过，请不要重复添加") {
         return true;
       }
     }
@@ -581,7 +593,14 @@ class XiaoZhiUtil {
         response.data,
       );
       if (xiaozhiResponse.success) {
-        return xiaozhiResponse.token;
+        if (xiaozhiResponse.token != null &&
+            xiaozhiResponse.token!.isNotEmpty) {
+          return xiaozhiResponse.token;
+        }
+        final data = xiaozhiResponse.data;
+        if (data is Map && data["token"] != null) {
+          return data["token"].toString();
+        }
       }
     }
     return null;
@@ -603,12 +622,25 @@ class XiaoZhiUtil {
   }
 
   Future<EndpointsResponse?> endpointsList(int endpointIds) async {
-    String url = "https://api.XiaoZhi.me/mcp/endpoints/list";
-    final map = {"endpoint_ids": "agent_$endpointIds"};
+    final bool useCustomApi = Urls.hasCustomXiaoZhiApiBaseUrl();
+    final String url = useCustomApi
+        ? "api/agents/$endpointIds/mcp-tools"
+        : "https://api.XiaoZhi.me/mcp/endpoints/list";
+    final map = useCustomApi ? null : {"endpoint_ids": "agent_$endpointIds"};
     final response = await _dio.get(url, queryParameters: map);
     if (response.data != null) {
-      EndpointsResponse data = EndpointsResponse.fromJson(response.data);
-      return data;
+      if (response.data is Map<String, dynamic> &&
+          (response.data as Map<String, dynamic>)["endpoints"] != null) {
+        return EndpointsResponse.fromJson(response.data);
+      }
+      XiaozhiResponse<EndpointsResponse> xiaozhiResponse =
+          XiaozhiResponse.fromJsonT(
+            response.data,
+            factory: (value) => EndpointsResponse.fromJson(value),
+          );
+      if (xiaozhiResponse.success) {
+        return xiaozhiResponse.data;
+      }
     }
     return null;
   }

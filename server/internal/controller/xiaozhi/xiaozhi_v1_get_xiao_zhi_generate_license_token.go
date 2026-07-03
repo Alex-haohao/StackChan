@@ -13,9 +13,18 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 
 	"stackChan/api/xiaozhi/v1"
+	"stackChan/internal/xiaozhi"
 )
 
 func (c *ControllerV1) GetXiaoZhiGenerateLicenseToken(ctx context.Context, req *v1.GetXiaoZhiGenerateLicenseTokenReq) (res *v1.GetXiaoZhiGenerateLicenseTokenRes, err error) {
+	if xiaozhi.IsSelfHostedProvider() {
+		token, err := xiaozhi.GetCompatToken()
+		if err != nil {
+			return nil, err
+		}
+		return new(v1.GetXiaoZhiGenerateLicenseTokenRes(token)), nil
+	}
+
 	generateLicenseToken := g.Cfg().MustGet(ctx, "xiaozhi.generate_license_token").String()
 	if generateLicenseToken == "" {
 		return nil, gerror.NewCode(gcode.CodeInvalidParameter, "generate_license_token is empty")

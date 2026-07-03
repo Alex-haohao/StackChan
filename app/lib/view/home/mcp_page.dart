@@ -27,6 +27,7 @@ class _McpPageState extends State<McpPage> {
   late final TextEditingController _descController;
 
   final RxnString endpointToken = RxnString();
+  final RxBool endpointTokenLoaded = false.obs;
 
   final RxList<Tool> toolList = RxList([]);
 
@@ -68,10 +69,12 @@ class _McpPageState extends State<McpPage> {
   }
 
   Future<void> getToken(int id) async {
+    endpointTokenLoaded.value = false;
     final token = await XiaoZhiUtil.shared.generateMcpEndpointToken(id);
     if (token != null) {
       endpointToken.value = token;
     }
+    endpointTokenLoaded.value = true;
   }
 
   @override
@@ -324,37 +327,46 @@ class _McpPageState extends State<McpPage> {
                     CupertinoListSection.insetGrouped(
                       header: Text("Access point address"),
                       children: [
-                        if (endpointToken.value != null)
+                        if (endpointToken.value != null &&
+                            endpointToken.value!.isNotEmpty)
                           CupertinoListTile(
                             title: Padding(
                               padding: .all(5),
                               child: Text(
                                 softWrap: true,
                                 maxLines: 100,
-                                "wss://api.XiaoZhi.me/mcp/?token=${endpointToken.value}",
+                                XiaoZhiUtil.buildMcpAccessPointAddress(
+                                  endpointToken.value!,
+                                ),
                               ),
                             ),
                             trailing: CupertinoButton(
                               child: Icon(CupertinoIcons.doc_on_doc),
                               onPressed: () async {
+                                final address =
+                                    XiaoZhiUtil.buildMcpAccessPointAddress(
+                                      endpointToken.value!,
+                                    );
                                 await Clipboard.setData(
-                                  ClipboardData(
-                                    text:
-                                        "wss://api.XiaoZhi.me/mcp/?token=${endpointToken.value}",
-                                  ),
+                                  ClipboardData(text: address),
                                 );
                                 AppState.shared.showToast("Already copied");
                               },
                             ),
                             onTap: () async {
+                              final address =
+                                  XiaoZhiUtil.buildMcpAccessPointAddress(
+                                    endpointToken.value!,
+                                  );
                               await Clipboard.setData(
-                                ClipboardData(
-                                  text:
-                                      "wss://api.XiaoZhi.me/mcp/?token=${endpointToken.value}",
-                                ),
+                                ClipboardData(text: address),
                               );
                               AppState.shared.showToast("Already copied");
                             },
+                          )
+                        else if (endpointTokenLoaded.value)
+                          CupertinoListTile(
+                            title: Center(child: Text("Not configured")),
                           )
                         else
                           CupertinoListTile(

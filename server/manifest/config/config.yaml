@@ -37,5 +37,15 @@ rsa:
     private:
 
 xiaozhi:
+  # official: use https://xiaozhi.me APIs through xiaozhi.secret_key.
+  # self_hosted: use /stackChan/xiaozhi/compat plus the self-hosted manager-api.
+  provider: official
   secret_key:
   generate_license_token:
+  self_host_manager_api_base_url:
+  self_host_manager_token:
+  self_host_agent_id:
+  self_host_compat_agent_id: 1
+  self_host_agent_name: StackChan
+  self_host_board: StackChan
+  self_host_app_version: self-hosted
