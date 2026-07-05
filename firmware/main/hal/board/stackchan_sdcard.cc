@@ -39,17 +39,21 @@ bool pack_manifest_exists()
 bool ensure_stackchan_sdcard_mounted()
 {
     if (s_mounted) {
+        ESP_LOGD(kTag, "microSD already mounted");
         return true;
     }
     if (pack_manifest_exists()) {
         s_mounted = true;
+        ESP_LOGI(kTag, "avatar pack manifest already accessible at %s", kStackChanSdMountPoint);
         return true;
     }
     if (s_mount_attempted) {
+        ESP_LOGW(kTag, "microSD mount already attempted and failed");
         return false;
     }
     s_mount_attempted = true;
 
+    ESP_LOGI(kTag, "mounting microSD at %s", kStackChanSdMountPoint);
     gpio_set_direction(kSdCsPin, GPIO_MODE_OUTPUT);
     gpio_set_level(kSdCsPin, 1);
 
